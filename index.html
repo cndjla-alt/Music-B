@@ -1,0 +1,517 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BEAT GANG 8</title>
+<style>
+:root {
+  --bg:#090b12;
+  --panel:#151925;
+  --green:#a5ff00;
+  --muted:#8991a5;
+  --text:#f4f6ff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:radial-gradient(circle at top,#20283a,#090b12 60%);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+}
+header {
+  text-align:center;
+  padding:25px 12px 12px;
+}
+.logo {
+  font-size:34px;
+  font-weight:1000;
+  letter-spacing:3px;
+}
+.logo span { color:var(--green); }
+.subtitle {
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:4px;
+  margin-top:7px;
+}
+main {
+  width:min(100%,850px);
+  margin:auto;
+  padding:12px;
+}
+.panel {
+  background:rgba(21,25,37,.94);
+  border:1px solid #30384b;
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:14px;
+  box-shadow:0 10px 35px #0005;
+}
+.section-title {
+  font-size:12px;
+  color:var(--green);
+  letter-spacing:2px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+.styles {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+.style {
+  background:#242b3c;
+  color:#cbd1df;
+  border:1px solid #343d52;
+  padding:10px 3px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:bold;
+}
+.style.active {
+  color:#10140a;
+  background:var(--green);
+  border-color:var(--green);
+}
+.controls {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.play {
+  border:0;
+  border-radius:50px;
+  padding:15px 34px;
+  font-size:15px;
+  font-weight:900;
+  background:var(--green);
+  color:#111;
+}
+.stop {
+  border:1px solid #596174;
+  border-radius:50px;
+  padding:14px 24px;
+  background:#252c3c;
+  color:white;
+  font-weight:bold;
+}
+.bpm-box {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#cbd1df;
+  font-size:13px;
+}
+input[type=range] {
+  accent-color:var(--green);
+  width:100%;
+}
+#bpm { width:110px; }
+.characters {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.character {
+  background:linear-gradient(145deg,#252d40,#151a27);
+  border:1px solid #343e54;
+  border-radius:15px;
+  padding:12px;
+  min-width:0;
+}
+.character.on {
+  border-color:var(--green);
+  box-shadow:0 0 15px #a5ff0025;
+}
+.person {
+  height:95px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:64px;
+  filter:drop-shadow(0 5px 5px #0008);
+}
+.char-name {
+  font-size:13px;
+  font-weight:900;
+  text-align:center;
+  margin:4px 0;
+}
+.char-role {
+  color:var(--muted);
+  text-align:center;
+  font-size:10px;
+  margin-bottom:10px;
+}
+.channel-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.toggle {
+  border:0;
+  border-radius:20px;
+  padding:8px 13px;
+  font-size:10px;
+  font-weight:bold;
+  background:#343c50;
+  color:white;
+}
+.toggle.active {
+  background:var(--green);
+  color:#111;
+}
+.volume {
+  margin-top:8px;
+}
+.volume-label {
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  color:var(--muted);
+}
+.master {
+  margin-top:12px;
+}
+.visualizer {
+  height:55px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  overflow:hidden;
+}
+.bar {
+  width:5px;
+  height:8px;
+  border-radius:5px;
+  background:var(--green);
+  opacity:.8;
+}
+.visualizer.playing .bar {
+  animation:pulse .5s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { height:5px; }
+  to { height:45px; }
+}
+.footer {
+  text-align:center;
+  color:#667087;
+  font-size:10px;
+  padding:10px 0 25px;
+  letter-spacing:2px;
+}
+@media(min-width:650px) {
+  .characters { grid-template-columns:repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">BEAT <span>GANG</span> 8</div>
+  <div class="subtitle">BUILD YOUR OWN SOUND</div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="section-title">SELECT YOUR STYLE</div>
+    <div class="styles" id="styles"></div>
+  </section>
+
+  <section class="panel">
+    <div class="controls">
+      <button class="play" id="play">▶ PLAY</button>
+      <button class="stop" id="stop">■ STOP</button>
+      <div class="bpm-box">
+        BPM <strong id="bpmValue">122</strong>
+        <input id="bpm" type="range" min="80" max="160" value="122">
+      </div>
+    </div>
+    <div class="visualizer" id="visualizer"></div>
+    <div class="master">
+      <div class="volume-label">
+        <span>MASTER VOLUME</span>
+        <span id="masterValue">80%</span>
+      </div>
+      <input id="master" type="range" min="0" max="100" value="80">
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-title">YOUR BEAT GANG — 8 CHANNELS</div>
+    <div class="characters" id="characters"></div>
+  </section>
+
+  <div class="footer">BEAT GANG 8 · MAKE YOUR OWN BEAT</div>
+</main>
+
+<script>
+const styles = [
+  "TECH HOUSE","MINIMAL","DEEP HOUSE","DISCO",
+  "AFRO HOUSE","DARK TECHNO","MELODIC","FUTURE"
+];
+
+const characters = [
+  {name:"BOSS",role:"KICK",emoji:"🕶️",freq:55,type:"kick"},
+  {name:"SHADOW",role:"BASS",emoji:"🥷",freq:65,type:"bass"},
+  {name:"ROCK",role:"CLAP",emoji:"🤘",freq:180,type:"clap"},
+  {name:"ICE",role:"HI-HAT",emoji:"😎",freq:900,type:"hat"},
+  {name:"GHOST",role:"PERC",emoji:"👻",freq:260,type:"perc"},
+  {name:"BLAZE",role:"SYNTH",emoji:"🔥",freq:440,type:"synth"},
+  {name:"KING",role:"LEAD",emoji:"👑",freq:520,type:"lead"},
+  {name:"ZERO",role:"FX",emoji:"🤖",freq:700,type:"fx"}
+];
+
+const patterns = {
+  "TECH HOUSE": [
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+    [1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],
+    [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+    [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0],
+    [0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1],
+    [0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0]
+  ],
+  "MINIMAL": [
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+    [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0],
+    [0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+    [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+    [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0],
+    [0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
+  ],
+  "DEEP HOUSE": [
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+    [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0],
+    [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+    [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0],
+    [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
+    [0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]
+  ]
+};
+
+let currentStyle = "TECH HOUSE";
+let bpm = 122;
+let step = 0;
+let timer = null;
+let playing = false;
+let audio = null;
+let masterGain = null;
+let channels = characters.map(() => ({on:true,volume:0.75}));
+
+const stylesBox = document.getElementById("styles");
+const charsBox = document.getElementById("characters");
+const visualizer = document.getElementById("visualizer");
+
+styles.forEach(style => {
+  const button = document.createElement("button");
+  button.className = "style" + (style === currentStyle ? " active" : "");
+  button.textContent = style;
+  button.onclick = () => selectStyle(style);
+  stylesBox.appendChild(button);
+});
+
+function selectStyle(style) {
+  currentStyle = style;
+  document.querySelectorAll(".style").forEach(b => {
+    b.classList.toggle("active",b.textContent === style);
+  });
+  if(style === "TECH HOUSE") bpm = 122;
+  if(style === "MINIMAL") bpm = 115;
+  if(style === "DEEP HOUSE") bpm = 118;
+  if(style === "DISCO") bpm = 124;
+  if(style === "AFRO HOUSE") bpm = 120;
+  if(style === "DARK TECHNO") bpm = 135;
+  if(style === "MELODIC") bpm = 122;
+  if(style === "FUTURE") bpm = 128;
+  document.getElementById("bpm").value = bpm;
+  document.getElementById("bpmValue").textContent = bpm;
+  if(playing) restartClock();
+}
+
+characters.forEach((character,index) => {
+  const card = document.createElement("div");
+  card.className = "character on";
+  card.innerHTML = `
+    <div class="person">${character.emoji}</div>
+    <div class="char-name">${character.name}</div>
+    <div class="char-role">${character.role}</div>
+    <div class="channel-row">
+      <span style="font-size:10px;color:#8991a5">CHANNEL ${index+1}</span>
+      <button class="toggle active">ON</button>
+    </div>
+    <div class="volume">
+      <div class="volume-label">
+        <span>VOLUME</span><span class="vol-value">75%</span>
+      </div>
+      <input type="range" min="0" max="100" value="75">
+    </div>`;
+  const toggle = card.querySelector(".toggle");
+  const slider = card.querySelector("input");
+  const value = card.querySelector(".vol-value");
+
+  toggle.onclick = () => {
+    channels[index].on = !channels[index].on;
+    toggle.classList.toggle("active",channels[index].on);
+    toggle.textContent = channels[index].on ? "ON" : "OFF";
+    card.classList.toggle("on",channels[index].on);
+  };
+  slider.oninput = () => {
+    channels[index].volume = slider.value / 100;
+    value.textContent = slider.value + "%";
+  };
+  charsBox.appendChild(card);
+});
+
+for(let i=0;i<32;i++) {
+  const bar = document.createElement("div");
+  bar.className = "bar";
+  bar.style.animationDelay = (i*0.035)+"s";
+  visualizer.appendChild(bar);
+}
+
+function setupAudio() {
+  if(audio) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if(!AudioContext) {
+    alert("Ваш браузер не поддерживает Web Audio.");
+    return;
+  }
+  audio = new AudioContext();
+  masterGain = audio.createGain();
+  masterGain.gain.value = 0.8;
+  masterGain.connect(audio.destination);
+}
+
+function sound(type,volume) {
+  if(!audio || volume <= 0) return;
+  const now = audio.currentTime;
+  const gain = audio.createGain();
+  gain.gain.setValueAtTime(Math.max(0.001,volume),now);
+  gain.connect(masterGain);
+
+  if(type === "kick") {
+    const osc = audio.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(130,now);
+    osc.frequency.exponentialRampToValueAtTime(42,now+0.13);
+    gain.gain.setValueAtTime(volume,now);
+    gain.gain.exponentialRampToValueAtTime(0.001,now+0.24);
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now+0.25);
+  } else if(type === "hat" || type === "clap" || type === "perc") {
+    const length = audio.sampleRate * 0.12;
+    const buffer = audio.createBuffer(1,length,audio.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<length;i++) data[i] = Math.random()*2-1;
+    const noise = audio.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audio.createBiquadFilter();
+    filter.type = type === "hat" ? "highpass" : "bandpass";
+    filter.frequency.value = type === "hat" ? 7000 : 1500;
+    gain.gain.exponentialRampToValueAtTime(0.001,now+0.11);
+    noise.connect(filter);
+    filter.connect(gain);
+    noise.start(now);
+    noise.stop(now+0.12);
+  } else {
+    const osc = audio.createOscillator();
+    osc.type = type === "bass" ? "sawtooth" : "triangle";
+    const notes = [55,65.4,73.4,82.4,98,110,130.8,146.8];
+    const note = notes[Math.floor(step/2)%notes.length];
+    osc.frequency.value = type === "bass" ? note : note*4;
+    gain.gain.setValueAtTime(volume,now);
+    gain.gain.exponentialRampToValueAtTime(0.001,now+0.2);
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now+0.21);
+  }
+}
+
+function getPattern(index) {
+  const preset = patterns[currentStyle];
+  if(preset) return preset[index];
+  const base = patterns["TECH HOUSE"][index].slice();
+  if(currentStyle === "DARK TECHNO") {
+    return base.map((v,i) => i%4===0 ? v : (Math.random()<0.08 ? 1 : v));
+  }
+  if(currentStyle === "AFRO HOUSE") {
+    return base.map((v,i) => i%4===2 ? 1 : v);
+  }
+  if(currentStyle === "DISCO") {
+    return base.map((v,i) => i%2===1 ? 1 : v);
+  }
+  if(currentStyle === "MELODIC") {
+    return base.map((v,i) => i%8===4 ? 1 : v);
+  }
+  if(currentStyle === "FUTURE") {
+    return base.map((v,i) => i%4===3 ? 1 : v);
+  }
+  return base;
+}
+
+function tick() {
+  for(let i=0;i<characters.length;i++) {
+    if(!channels[i].on) continue;
+    const pattern = getPattern(i);
+    if(pattern[step]) sound(characters[i].type,channels[i].volume);
+  }
+  step = (step+1)%16;
+}
+
+function restartClock() {
+  clearInterval(timer);
+  timer = setInterval(tick,60000/bpm/4);
+}
+
+async function start() {
+  setupAudio();
+  if(!audio) return;
+  await audio.resume();
+  if(playing) return;
+  playing = true;
+  step = 0;
+  visualizer.classList.add("playing");
+  document.getElementById("play").textContent = "▶ PLAYING";
+  tick();
+  restartClock();
+}
+
+function stop() {
+  playing = false;
+  clearInterval(timer);
+  timer = null;
+  visualizer.classList.remove("playing");
+  document.getElementById("play").textContent = "▶ PLAY";
+}
+
+document.getElementById("play").onclick = start;
+document.getElementById("stop").onclick = stop;
+
+document.getElementById("bpm").oninput = e => {
+  bpm = Number(e.target.value);
+  document.getElementById("bpmValue").textContent = bpm;
+  if(playing) restartClock();
+};
+
+document.getElementById("master").oninput = e => {
+  const value = Number(e.target.value);
+  document.getElementById("masterValue").textContent = value+"%";
+  if(masterGain) masterGain.gain.value = value/100;
+};
+</script>
+</body>
+</html>
